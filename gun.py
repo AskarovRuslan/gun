@@ -173,7 +173,7 @@ while not finished:
             score += target.hit_check(ball.coord, ball.r)
         if ball.live:
             ball.draw()
-            ball_new_list.append(ball)  # отсеивает мёртвые шары
+            ball_new_list.append(ball)  #3 отсеивает мёртвые шары
     ball_list = ball_new_list
     for event in pg.event.get():
         if event.type == pg.QUIT:
