@@ -19,20 +19,17 @@ FONT_SIZE = 50
 
 x = []
 y = []
-# SCREEN_SIZE[1] // 20 - изменений координат
 a = 0
+N = 200
 b = SCREEN_SIZE[1] // 2
-for i in range(21):
+for i in range(N + 1):
     x.append(a)
     y.append(b)
-    a = a + SCREEN_SIZE[0] // 20
-    b = b + randint(-40, 40)
+    a = a + SCREEN_SIZE[0] // N
+    b = b + randint(-(800 // N), 800 // N)
 print(x)
 print(y)
-# pg.draw.line(screen, WHITE, (x[0], y[0]), (x[1], y[1]), 1)
 
-
-# Считывание имени игрока
 name_1 = input("Введите первого игрока: ")
 name_2 = input("Введите второго игрока: ")
 
@@ -58,7 +55,7 @@ class Ball:
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255))
         self.coord = coord
         self.v = v
-        self.r = 15
+        self.r = 12
         self.live = True
         self.time = t0  # время когда заспавнили шарик
 
@@ -88,15 +85,16 @@ class Ball:
 
     def hit_check(self, xy):
         (gun_x, gun_y) = xy
-        (x, y) = self.coord
-        distance = ((gun_x - x) ** 2 + (gun_y - y) ** 2) ** 0.5
+        (xx, yy) = self.coord
+
+        for i in range(N + 1):
+            distance = ((x[i] - xx) ** 2 + (y[i] - yy) ** 2) ** 0.5
+            if distance <= ((self.r // 2) + 1):
+                self.live = False
+
+        distance = ((gun_x - xx) ** 2 + (gun_y - yy) ** 2) ** 0.5
         if distance <= (self.r + 5):
             self.live = False
-            '''
-            self.coords = list((randint(50, SCREEN_SIZE[0] - 50), randint(50, SCREEN_SIZE[1] - 50)))
-            self.v = list((randint(0, 5), randint(0, 5)))
-            self.color = TARGET_COLORS[randint(0, 2)]
-            '''
             return 1
         else:
             return 0
@@ -114,9 +112,10 @@ class Gun:
         self.min_pow = 0
         self.max_pow = 10
         # self.power = randint(self.min_pow + 20, self.max_pow)
-        self.power = 20
+        self.power = 10
         # self.power = randint(10, 20)
         self.active = False
+        self.on = 0
 
     def draw(self):
         end_pos = (
@@ -132,6 +131,11 @@ class Gun:
     def set_an(self, mouse_pos):
         """Прицеливание. Зависит от положения мыши."""
         self.an = np.arctan2(mouse_pos[1] - self.coord[1], mouse_pos[0] - self.coord[0])
+
+    def power_up(self):
+        if self.on:
+            if self.power < 100:
+                self.power += 0.5
 
 
 class Target:
@@ -194,12 +198,12 @@ def clock_and_score_renewal(time0, score0, score1):
 
 
 def draw_background(color):
-    screen.fill(BLACK)
+    screen.fill(color)
 
 
 target_list = list(Target() for q in range(number_of_targets))
-gun_1 = Gun((x[2], y[2]))
-gun_2 = Gun((x[18], y[18]))
+gun_1 = Gun((x[N // 10], y[N // 10]))
+gun_2 = Gun((x[N - N // 10], y[N - N // 10]))
 
 pg.display.update()
 finished = False
@@ -209,18 +213,13 @@ ball_new_list = []
 score_1 = 0
 score_2 = 0
 
-# font = pg.font.Font(None, 25)
-# text_1 = font.render(name_1,True,WHITE)
-# text_2 = font.render(name_2,True,WHITE)
-
-
 player = 0
 while not finished:
     clock.tick(FPS)
     counter += 1
-    if counter % FPS == 0:
-        EYES = (randint(0, 100), randint(0, 100), randint(0, 100))
-    draw_background(EYES)
+    #if counter % FPS == 0:
+        #EYES = (randint(0, 100), randint(0, 100), randint(0, 100))
+    draw_background(BLACK)
     '''
     for target in target_list:
         target.move()
@@ -231,16 +230,8 @@ while not finished:
     ball_new_list = []
     for ball in ball_list:
         ball.move(counter)
-        # if ball.hit_check(gun_2.coord):
-        #    score_1 += 1
-        #    del ball
         score_1 += ball.hit_check(gun_2.coord)
         score_2 += ball.hit_check(gun_1.coord)
-
-        '''
-        for target in target_list:
-            score += target.hit_check(ball.coord, ball.r)
-        '''
         if ball.live:
             ball.draw()
             ball_new_list.append(ball)  # отсеивает мёртвые шары
@@ -254,14 +245,29 @@ while not finished:
             else:
                 gun_2.set_an(event.pos)
         elif event.type == pg.MOUSEBUTTONDOWN:
+            print('test')
+            if not player:
+                gun_1.on = 1
+            else:
+                gun_2.on = 1
+
+        elif event.type == pg.MOUSEBUTTONUP:
             if not player:
                 ball_list.append(Ball(gun_end, gun_1.strike(), counter))
+                # gun_1.power = 10
+                gun_1.on = 0
+                gun_1.power = 10
             else:
                 ball_list.append(Ball(gun_end_2, gun_2.strike(), counter))
+                # gun_2.power = 10
+                gun_2.on = 0
+                gun_2.power = 10
             player = (player + 1) % 2
     clock_and_score_renewal(counter, score_1, score_2)
+    gun_1.power_up()
+    gun_2.power_up()
 
-    for i in range(20):
+    for i in range(N):
         pg.draw.line(screen, WHITE, (x[i], y[i]), (x[i + 1], y[i + 1]), 2)
 
     pg.display.update()
