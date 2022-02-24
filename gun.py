@@ -254,12 +254,10 @@ while not finished:
         elif event.type == pg.MOUSEBUTTONUP:
             if not player:
                 ball_list.append(Ball(gun_end, gun_1.strike(), counter))
-                # gun_1.power = 10
                 gun_1.on = 0
                 gun_1.power = 10
             else:
                 ball_list.append(Ball(gun_end_2, gun_2.strike(), counter))
-                # gun_2.power = 10
                 gun_2.on = 0
                 gun_2.power = 10
             player = (player + 1) % 2
