@@ -27,8 +27,6 @@ for i in range(N + 1):
     y.append(b)
     a = a + SCREEN_SIZE[0] // N
     b = b + randint(-(800 // N), 800 // N)
-print(x)
-print(y)
 
 name_1 = input("Введите первого игрока: ")
 name_2 = input("Введите второго игрока: ")
@@ -40,8 +38,8 @@ SCREEN_SIZE = (SCREEN_SIZE[0], SCREEN_SIZE[1] - 100)
 clock = pg.time.Clock()
 screen.fill(BLACK)
 
-pg.draw.line(screen, WHITE, (x[0], y[0]), (x[1], y[1]), 2)
-pg.draw.line(screen, WHITE, (x[1], y[1]), (x[2], y[2]), 2)
+#pg.draw.line(screen, WHITE, (x[0], y[0]), (x[1], y[1]), 2)
+#pg.draw.line(screen, WHITE, (x[1], y[1]), (x[2], y[2]), 2)
 
 font = pg.font.Font(None, FONT_SIZE)
 g = 10  # ускорение свободного падения
@@ -138,42 +136,6 @@ class Gun:
                 self.power += 0.5
 
 
-class Target:
-    def __init__(self):
-        self.coords = list((randint(50, SCREEN_SIZE[0] - 50), randint(50, SCREEN_SIZE[1] - 50)))
-        self.r = 30
-        self.v = list((randint(0, 7), randint(0, 7)))
-        self.color = TARGET_COLORS[randint(0, 2)]
-
-    def draw(self):
-        pg.draw.circle(screen, self.color, self.coords, self.r)
-        pg.draw.circle(screen, WHITE, self.coords, self.r - 10)
-        pg.draw.circle(screen, self.color, self.coords, self.r - 20)
-
-    def hit_check(self, xy, ball_radius):
-        (ball_x, ball_y) = xy
-        (x, y) = self.coords
-        distance = ((ball_x - x) ** 2 + (ball_y - y) ** 2) ** 0.5
-        if distance <= (self.r + ball_radius):
-            self.coords = list((randint(50, SCREEN_SIZE[0] - 50), randint(50, SCREEN_SIZE[1] - 50)))
-            self.v = list((randint(0, 5), randint(0, 5)))
-            self.color = TARGET_COLORS[randint(0, 2)]
-            return 1
-        else:
-            return 0
-
-    def move(self):
-        for i in (0, 1):
-            self.coords[i] = self.coords[i] + self.v[i]
-        for i in (0, 1):
-            if self.coords[i] < self.r:
-                self.coords[i] = self.r
-                self.v[i] = (-1) * self.v[i]
-            elif self.coords[i] > SCREEN_SIZE[i] - self.r:
-                self.coords[i] = SCREEN_SIZE[i] - self.r
-                self.v[i] = (-1) * self.v[i]
-
-
 def clock_and_score_renewal(time0, score0, score1):
     time_passed = int(time0 / FPS)
     if time_passed < 60:
@@ -200,8 +162,6 @@ def clock_and_score_renewal(time0, score0, score1):
 def draw_background(color):
     screen.fill(color)
 
-
-target_list = list(Target() for q in range(number_of_targets))
 gun_1 = Gun((x[N // 10], y[N // 10]))
 gun_2 = Gun((x[N - N // 10], y[N - N // 10]))
 
@@ -245,7 +205,6 @@ while not finished:
             else:
                 gun_2.set_an(event.pos)
         elif event.type == pg.MOUSEBUTTONDOWN:
-            print('test')
             if not player:
                 gun_1.on = 1
             else:
